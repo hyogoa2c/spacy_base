@@ -1,0 +1,53 @@
+FROM ubuntu:focal
+
+USER root
+
+RUN apt-get update && apt-get install --no-install-recommends -y \
+        wget \
+        gcc \
+        git \
+        python3-pip \
+        python3-dev \
+        curl \
+        locales \
+        musl-dev \
+        && apt-get autoremove -y \
+        && apt clean
+
+RUN pip3 --no-cache-dir install -U pip
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
+RUN apt-get install -y nodejs
+# mecab関係のインストール
+RUN apt-get install -y mecab mecab-ipadic-utf8 libmecab-dev
+
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 10
+RUN update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10
+
+# Python必要なモジュールのインストール
+RUN pip install --upgrade setuptools
+ADD requirements.txt ./tmp/requirements.txt
+RUN pip install -r ./tmp/requirements.txt
+
+RUN cp /etc/mecabrc /usr/local/etc/
+
+RUN pip install -U pip setuptools wheel
+RUN pip install -U spacy
+RUN python -m spacy download en_core_web_sm \
+    && python -m spacy download ja_core_news_sm
+
+# install jupyterlab & extentions
+RUN pip install --upgrade --no-cache-dir \
+    'jupyterlab~=3.0' \
+    jupyterlab_code_formatter \
+    jupyterlab_theme_solarized_dark \
+    jupyterlab-lsp \
+    yapf \
+    'python-lsp-server[all]' \
+    && rm -rf ~/.cache/pip \
+RUN jupyter labextension install \
+      @ryantam626/jupyterlab_code_formatter \
+      @jupyterlab/toc \
+      @AllanChain/jupyterlab-theme-solarized-dark \
+    && jupyter serverextension enable --py jupyterlab_code_formatter
+
+WORKDIR /home/work
