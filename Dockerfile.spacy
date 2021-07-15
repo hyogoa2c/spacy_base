@@ -43,6 +43,7 @@ RUN pip install --upgrade --no-cache-dir \
     jupyterlab-lsp \
     yapf \
     'python-lsp-server[all]' \
+    pyls-flake8 \
     && rm -rf ~/.cache/pip \
 RUN jupyter labextension install \
       @ryantam626/jupyterlab_code_formatter \

@@ -1,3 +1,7 @@
+jedi
+black
+flake8
 requests
 beautifulsoup4
 mecab-python3
+pandas
